@@ -22,12 +22,14 @@ func (r *Redis) Connect(
 	password string,
 	db int,
 ) error {
-	r.Client = redis.NewClient(&redis.Options{
+	options := &redis.Options{
 		Addr:     addr,
 		Username: username,
 		Password: password,
 		DB:       db,
-	})
+	}
+
+	r.Client = redis.NewClient(options)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
