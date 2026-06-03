@@ -16,8 +16,11 @@ func New() *Postgres {
 	return &Postgres{}
 }
 
-func (p *Postgres) Connect(connString string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+func (p *Postgres) Connect(
+	connString string,
+	timeout time.Duration,
+) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	config, err := pgxpool.ParseConfig(connString)

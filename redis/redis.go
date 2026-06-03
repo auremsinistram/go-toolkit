@@ -21,6 +21,7 @@ func (r *Redis) Connect(
 	username string,
 	password string,
 	db int,
+	timeout time.Duration,
 ) error {
 	options := &redis.Options{
 		Addr:     addr,
@@ -31,7 +32,7 @@ func (r *Redis) Connect(
 
 	r.Client = redis.NewClient(options)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	if err := r.Client.Ping(ctx).Err(); err != nil {
