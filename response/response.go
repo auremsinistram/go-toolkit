@@ -86,7 +86,7 @@ func pack[T ErrorData](
 		return statusOK, bytes
 	}
 
-	code, ok := errors.GetCode(err)
+	code, ok := errors.Code(err)
 	if !ok {
 		return http.StatusInternalServerError, errRes
 	}

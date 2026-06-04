@@ -3,10 +3,10 @@ module github.com/auremsinistram/go-toolkit
 go 1.25.10
 
 require (
-	github.com/auremsinistram/go-errors v0.4.0
-	github.com/jackc/pgx/v5 v5.9.2
+	github.com/auremsinistram/go-errors v0.5.0
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/labstack/echo/v5 v5.1.1
-	github.com/redis/go-redis/v9 v9.19.0
+	github.com/redis/go-redis/v9 v9.20.0
 	go.uber.org/zap v1.28.0
 )
 
