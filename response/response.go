@@ -20,6 +20,7 @@ type ErrorData interface {
 
 func Send[T ErrorData](
 	ctx *echo.Context,
+	statusOK int,
 	res Response,
 	data any,
 	err error,
@@ -27,6 +28,7 @@ func Send[T ErrorData](
 	errData map[int]T,
 ) error {
 	status, bytes := pack(
+		statusOK,
 		res,
 		data,
 		err,
@@ -42,6 +44,7 @@ func Send[T ErrorData](
 }
 
 func pack[T ErrorData](
+	statusOK int,
 	res Response,
 	data any,
 	err error,
@@ -56,7 +59,7 @@ func pack[T ErrorData](
 			return http.StatusInternalServerError, errRes
 		}
 
-		return http.StatusOK, bytes
+		return statusOK, bytes
 	}
 
 	code, ok := errors.GetCode(err)
