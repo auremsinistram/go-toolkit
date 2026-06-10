@@ -67,6 +67,29 @@ func SendOK[T ErrorData](
 	return err
 }
 
+func SendError[T ErrorData](
+	ctx *echo.Context,
+	res Response,
+	err error,
+	errRes []byte,
+	errData map[int]T,
+) error {
+	status, bytes := pack(
+		http.StatusOK,
+		res,
+		nil,
+		err,
+		errRes,
+		errData,
+	)
+
+	if e := ctx.JSONBlob(status, bytes); e != nil {
+		return errors.Wrap(e, "response - SendError - #1")
+	}
+
+	return err
+}
+
 func pack[T ErrorData](
 	statusOK int,
 	res Response,
