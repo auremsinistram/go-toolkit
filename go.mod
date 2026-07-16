@@ -4,9 +4,10 @@ go 1.25.10
 
 require (
 	github.com/auremsinistram/go-errors v0.6.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/jackc/pgx/v5 v5.10.0
-	github.com/labstack/echo/v5 v5.1.1
-	github.com/redis/go-redis/v9 v9.20.0
+	github.com/labstack/echo/v5 v5.2.1
+	github.com/redis/go-redis/v9 v9.21.0
 	go.uber.org/zap v1.28.0
 )
 
