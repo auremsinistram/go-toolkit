@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
 	"github.com/auremsinistram/go-errors"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 )
 
@@ -18,6 +20,8 @@ type (
 	ClaimsHandlerFunc func(c *echo.Context, claims jwt.Claims)
 	ErrorHandlerFunc  func(c *echo.Context, err error) error
 )
+
+type requestIDKey struct{}
 
 func Auth(
 	cookieName string,
@@ -62,6 +66,26 @@ func Auth(
 			}
 
 			return nil
+		}
+	}
+}
+
+func RequestID() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			req := c.Request()
+			requestID := req.Header.Get(echo.HeaderXRequestID)
+
+			if requestID == "" {
+				requestID = uuid.New().String()
+			}
+
+			ctx := context.WithValue(req.Context(), requestIDKey{}, requestID)
+
+			c.SetRequest(req.WithContext(ctx))
+			c.Response().Header().Set(echo.HeaderXRequestID, requestID)
+
+			return next(c)
 		}
 	}
 }
