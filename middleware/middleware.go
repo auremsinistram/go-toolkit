@@ -4,11 +4,14 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/auremsinistram/go-errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -86,6 +89,69 @@ func RequestID() echo.MiddlewareFunc {
 			c.Response().Header().Set(echo.HeaderXRequestID, requestID)
 
 			return next(c)
+		}
+	}
+}
+
+func RequestLogger(logger *zap.Logger) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			var err error
+
+			start := time.Now()
+
+			if err = next(c); err != nil {
+				c.Echo().HTTPErrorHandler(c, err)
+			}
+
+			res, status := echo.ResolveResponseStatus(c.Response(), err)
+
+			var level zapcore.Level
+
+			switch {
+			case status >= 500:
+				level = zap.ErrorLevel
+			case status >= 400:
+				level = zap.WarnLevel
+			default:
+				level = zap.InfoLevel
+			}
+
+			if ce := logger.Check(level, "HTTP request"); ce != nil {
+				req := c.Request()
+				fields := make([]zap.Field, 0, 10)
+
+				fields = append(
+					fields,
+					zap.Int("status", status),
+					zap.String("method", req.Method),
+					zap.String("path", req.URL.Path),
+				)
+
+				if req.URL.RawQuery != "" {
+					fields = append(fields, zap.String("query", req.URL.RawQuery))
+				}
+
+				if requestID, ok := req.Context().Value(requestIDKey{}).(string); ok {
+					fields = append(fields, zap.String("request_id", requestID))
+				}
+
+				fields = append(
+					fields,
+					zap.Int64("response_size", res.Size),
+					zap.Duration("latency", time.Since(start)),
+					zap.String("remote_ip", c.RealIP()),
+					zap.String("user_agent", req.UserAgent()),
+				)
+
+				if err != nil {
+					fields = append(fields, zap.Error(err))
+				}
+
+				ce.Write(fields...)
+			}
+
+			return err
 		}
 	}
 }
