@@ -27,14 +27,12 @@ type (
 type requestIDKey struct{}
 
 func Auth(
+	parser *jwt.Parser,
 	cookieName string,
 	keyHandler jwt.Keyfunc,
 	claimsHandler ClaimsHandlerFunc,
 	errorHandler ErrorHandlerFunc,
-	options ...jwt.ParserOption,
 ) echo.MiddlewareFunc {
-	parser := jwt.NewParser(options...)
-
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) (err error) {
 			defer func() {
